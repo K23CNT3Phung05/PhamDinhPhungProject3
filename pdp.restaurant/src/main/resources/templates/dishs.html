@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thực Đơn - PDP Restaurant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --pdp-gold: #ffc107; --pdp-dark: #212529; --pdp-soft: #f8f9fa; }
+        body { background-color: #fdfdfd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        /* Card & Animation */
+        .card-dish { border: none; border-radius: 20px; overflow: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: white; height: 100%; }
+        .card-dish:hover { transform: translateY(-12px); box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important; }
+
+        /* Image Overlay */
+        .img-container { height: 220px; position: relative; overflow: hidden; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card-dish:hover .img-container img { transform: scale(1.1); }
+        .category-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: white; padding: 5px 15px; border-radius: 20px; backdrop-filter: blur(5px); font-size: 0.75rem; z-index: 2; }
+
+        /* Buttons & Prices */
+        .btn-order-now { background: var(--pdp-gold); color: #000; font-weight: 700; border: none; transition: 0.3s; }
+        .btn-order-now:hover { background: #e5ad06; transform: scale(1.05); color: #000; }
+        .btn-add-cart { border: 1.5px solid var(--pdp-dark); color: var(--pdp-dark); transition: 0.3s; }
+        .btn-add-cart:hover { background: var(--pdp-dark); color: white; }
+        .price-tag { color: #e44d26; font-weight: 800; font-size: 1.3rem; }
+
+        /* Search & Filter Bar */
+        .search-container { background: linear-gradient(135deg, #212529 0%, #343a40 100%); border-radius: 0 0 40px 40px; padding: 60px 0; }
+        .search-box { border-radius: 30px 0 0 30px; padding: 12px 25px; border: none; }
+        .btn-search-main { border-radius: 0 30px 30px 0; background: var(--pdp-gold); color: black; font-weight: bold; border: none; padding: 0 25px; }
+
+        /* Nút Filter */
+        .filter-btn { border-radius: 25px; border: 1px solid rgba(255,255,255,0.2); color: white; transition: 0.3s; text-decoration: none; padding: 8px 20px; display: inline-block; font-size: 0.9rem; }
+        .filter-btn:hover, .filter-btn.active { background: var(--pdp-gold) !important; color: black !important; border-color: var(--pdp-gold) !important; font-weight: 600; }
+        .hover-gold:hover { color: var(--pdp-gold) !important; transition: 0.3s; }
+
+        /* New Home Button Style */
+        .btn-home-nav { color: white; font-size: 1.2rem; transition: 0.3s; }
+        .btn-home-nav:hover { color: var(--pdp-gold); transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-3">
+    <div class="container">
+        <div class="d-flex align-items-center">
+            <a th:href="@{/}" class="btn-home-nav me-3" title="Về trang chủ">
+                <i class="fas fa-home"></i>
+            </a>
+            <a class="navbar-brand fw-bold fs-3" th:href="@{/dishs}">
+                <i class="fas fa-utensils me-2 text-warning"></i>PDP <span class="text-warning">RESTAURANT</span>
+            </a>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/orders/list}" class="btn btn-outline-light position-relative rounded-pill px-3 border-0">
+                <i class="fas fa-history me-1 text-info"></i>
+                <span class="small fw-bold">ĐƠN ĐÃ ĐẶT</span>
+            </a>
+            <a th:href="@{/cart}" class="btn btn-outline-warning position-relative rounded-pill px-4 ms-2">
+                <i class="fas fa-shopping-basket me-2"></i> GIỎ HÀNG
+                <span th:if="${session.cartCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" th:text="${session.cartCount}">0</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<section class="search-container mb-5 shadow-lg">
+    <div class="container text-center">
+        <h1 class="text-white fw-bold mb-4">Thực Đơn PDP Restaurant</h1>
+        <form th:action="@{/dishs}" method="get" class="row justify-content-center mb-4">
+            <div class="col-md-7">
+                <div class="input-group">
+                    <input type="text" name="name" th:value="${keyword}" class="form-control search-box" placeholder="Tìm kiếm món ăn ngon tại đây...">
+                    <button class="btn btn-search-main" type="submit"><i class="fas fa-search me-2"></i> TÌM KIẾM</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="d-flex justify-content-center flex-wrap gap-2">
+            <a th:href="@{/dishs}" th:classappend="${selectedCategory == null} ? 'active' : ''" class="filter-btn">Tất cả món</a>
+            <a th:href="@{/dishs(category='Khai vị')}" th:classappend="${selectedCategory == 'Khai vị'} ? 'active' : ''" class="filter-btn">🥗 Khai vị</a>
+            <a th:href="@{/dishs(category='Món chính')}" th:classappend="${selectedCategory == 'Món chính'} ? 'active' : ''" class="filter-btn">🥩 Món chính</a>
+            <a th:href="@{/dishs(category='Tráng miệng')}" th:classappend="${selectedCategory == 'Tráng miệng'} ? 'active' : ''" class="filter-btn">🍰 Tráng miệng</a>
+            <a th:href="@{/dishs(category='Đồ uống')}" th:classappend="${selectedCategory == 'Đồ uống'} ? 'active' : ''" class="filter-btn">🍹 Đồ uống</a>
+        </div>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-5 text-center" role="alert">
+        <i class="fas fa-check-circle me-2"></i> <strong th:text="${successMessage}"></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4" th:if="${not #lists.isEmpty(dishs)}">
+        <div th:each="dish : ${dishs}" class="col-md-6 col-lg-4">
+            <div class="card card-dish shadow-sm border-0">
+                <div class="img-container">
+                    <img th:src="@{${dish.imageUrl}}" alt="Dish image">
+                    <span class="category-badge" th:text="${dish.category != null ? dish.category.name : 'Món ăn'}">Category</span>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold text-dark m-0" th:text="${dish.name}"></h5>
+                        <a th:href="@{/dishs/{id}(id=${dish.id})}" class="text-muted hover-gold"><i class="fas fa-external-link-alt"></i></a>
+                    </div>
+                    <p class="text-muted small flex-grow-1 mb-4" th:text="${dish.description}"></p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                        <span class="price-tag" th:text="${#numbers.formatDecimal(dish.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        <div class="d-flex gap-2">
+                            <form th:action="@{/cart/add}" method="post" class="m-0">
+                                <input type="hidden" name="dishId" th:value="${dish.id}">
+                                <button type="submit" class="btn btn-add-cart btn-sm rounded-pill px-3"><i class="fas fa-cart-plus"></i></button>
+                            </form>
+                            <form th:action="@{/orders/buy-now}" method="get" class="m-0">
+                                <input type="hidden" name="dishId" th:value="${dish.id}">
+                                <button type="submit" class="btn btn-order-now btn-sm px-4 rounded-pill shadow-sm">ĐẶT NGAY</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(dishs)}" class="text-center py-5">
+        <img src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png" alt="No results" style="width: 100px; opacity: 0.4;">
+        <h4 class="text-muted mt-4">Không tìm thấy món bạn cần rồi!</h4>
+        <p class="text-muted small">Hãy thử tìm với từ khóa khác hoặc lọc danh mục nhé.</p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <a th:href="@{/dishs}" class="btn btn-dark rounded-pill px-4 shadow-sm">Tất cả món</a>
+            <a th:href="@{/}" class="btn btn-outline-dark rounded-pill px-4 shadow-sm">
+                <i class="fas fa-home me-2"></i>Về Trang Chủ
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white py-5 mt-5">
+    <div class="container text-center">
+        <div class="mb-4">
+            <a href="#" class="text-white-50 mx-3 hover-gold text-decoration-none"><i class="fab fa-facebook fa-2x"></i></a>
+            <a href="#" class="text-white-50 mx-3 hover-gold text-decoration-none"><i class="fab fa-instagram fa-2x"></i></a>
+            <a href="#" class="text-white-50 mx-3 hover-gold text-decoration-none"><i class="fab fa-tiktok fa-2x"></i></a>
+        </div>
+        <p class="mb-0 opacity-50 small">&copy; 2025 PDP Restaurant - Luxury Dining</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

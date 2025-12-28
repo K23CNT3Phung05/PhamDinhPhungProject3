@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản trị - Food Admin</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4361ee; --secondary: #3a0ca3; --success: #4cc9f0;
+            --danger: #f72585; --bg-body: #f0f2f5;
+        }
+        body { background-color: var(--bg-body); font-family: 'Segoe UI', Roboto, sans-serif; color: #2d3436; }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; padding: 3.5rem 0; margin-bottom: -50px;
+            border-radius: 0 0 40px 40px; box-shadow: 0 10px 30px rgba(67, 97, 238, 0.2);
+        }
+
+        .stats-card {
+            border-radius: 20px; border: none; transition: 0.3s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); background: white;
+        }
+        .stats-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .stats-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; }
+
+        .quick-actions { background: white; border-radius: 24px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .action-item {
+            display: flex; align-items: center; padding: 1.2rem; border-radius: 18px;
+            transition: 0.2s; text-decoration: none; color: #4a5568;
+            border: 1px solid #f1f3f9; margin-bottom: 15px;
+        }
+        .action-item:hover { background: #f8faff; border-color: var(--primary); color: var(--primary); transform: scale(1.01); }
+        .action-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 18px; font-size: 18px; color: white; }
+
+        .nav-home-btn {
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(8px);
+            color: white; padding: 10px 22px; border-radius: 12px;
+            text-decoration: none; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .nav-home-btn:hover { background: white; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="fw-bold"><i class="fas fa-user-shield me-2"></i>Hệ Thống Quản Trị</h1>
+                <p class="opacity-75 mb-0">Quản lý thực đơn và hoạt động nhà hàng</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a th:href="@{/}" class="nav-home-btn shadow-sm">
+                    <i class="fas fa-home me-1"></i> Về Trang Chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-3">
+            <div class="stats-card p-4">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon bg-primary shadow-sm"><i class="fas fa-hamburger"></i></div>
+                    <div class="ms-3">
+                        <div class="h3 fw-bold mb-0" th:text="${totalDishs != null ? totalDishs : 0}">0</div>
+                        <div class="text-muted small fw-bold">MÓN ĂN</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card p-4">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon bg-info shadow-sm"><i class="fas fa-users"></i></div>
+                    <div class="ms-3">
+                        <div class="h3 fw-bold mb-0" th:text="${totalUsers != null ? totalUsers : 0}">0</div>
+                        <div class="text-muted small fw-bold">NGƯỜI DÙNG</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card p-4">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon bg-danger shadow-sm"><i class="fas fa-receipt"></i></div>
+                    <div class="ms-3">
+                        <div class="h3 fw-bold mb-0" th:text="${totalOrders != null ? totalOrders : 0}">0</div>
+                        <div class="text-muted small fw-bold text-uppercase">ĐƠN HÀNG</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <div class="quick-actions">
+                <h4 class="fw-bold mb-4 text-dark border-bottom pb-3">Thao tác nhanh</h4>
+
+                <a th:href="@{/admin/dishs}" class="action-item">
+                    <div class="action-icon bg-primary"><i class="fas fa-utensils"></i></div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0 fw-bold">Quản lý Món ăn</h6>
+                        <small class="text-muted">Xem danh sách, thêm, sửa hoặc xóa món ăn</small>
+                    </div>
+                    <i class="fas fa-arrow-right opacity-25"></i>
+                </a>
+
+                <a th:href="@{/admin/categories}" class="action-item">
+                    <div class="action-icon bg-info"><i class="fas fa-th-list"></i></div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0 fw-bold">Danh mục loại món</h6>
+                        <small class="text-muted">Quản lý nhóm: Khai vị, Món chính, Tráng miệng , Đồ Uống</small>
+                    </div>
+                    <i class="fas fa-arrow-right opacity-25"></i>
+                </a>
+
+                <a th:href="@{/admin/orders}" class="action-item">
+                    <div class="action-icon bg-danger"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0 fw-bold">Quản lý Đơn hàng</h6>
+                        <small class="text-muted">Cập nhật trạng thái giao hàng và thanh toán</small>
+                    </div>
+                    <i class="fas fa-arrow-right opacity-25"></i>
+                </a>
+
+                <a th:href="@{/admin/review}" class="action-item">
+                    <div class="action-icon" style="background: #7209b7;"><i class="fas fa-star-half-alt"></i></div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0 fw-bold">Đánh giá khách hàng</h6>
+                        <small class="text-muted">Xem phản hồi và xếp hạng từ thực khách</small>
+                    </div>
+                    <i class="fas fa-arrow-right opacity-25"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="quick-actions h-100">
+                <h4 class="fw-bold mb-4 text-dark border-bottom pb-3">Thông tin Admin</h4>
+                <div class="card border-0 bg-light rounded-4 p-3 mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-white p-2 rounded-circle me-3 border">
+                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold" th:text="${currentUser != null ? currentUser.fullName : 'Administrator'}">Administrator</div>
+                            <small class="text-success"><i class="fas fa-circle font-size-xs me-1"></i> Trực tuyến</small>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-1">Phiên bản hệ thống: <b>2.5.4</b></div>
+                    <div class="small text-muted">Lần cập nhật cuối: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">18/12/2025</span></div>
+                </div>
+
+                <a th:href="@{/admin/users}" class="btn btn-primary w-100 rounded-3 py-2 fw-bold shadow-sm">
+                    <i class="fas fa-user-cog me-2"></i>Quản lý Tài khoản
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

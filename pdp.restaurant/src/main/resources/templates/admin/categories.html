@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý danh mục</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/admin/dashboard}">
+            <i class="fas fa-cogs"></i> Admin Panel
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link text-white" th:href="@{/}">
+                <i class="fas fa-home"></i> Về trang chủ
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/dashboard}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- ĐÃ SỬA product -> dishes -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/dishes}">
+                            <i class="fas fa-utensils"></i> Quản lý món ăn
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/users}">
+                            <i class="fas fa-users"></i> Quản lý người dùng
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/orders}">
+                            <i class="fas fa-shopping-cart"></i> Quản lý đơn hàng
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/admin/categories}">
+                            <i class="fas fa-tags"></i> Quản lý danh mục
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2"><i class="fas fa-tags"></i> Quản lý danh mục</h1>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Thêm danh mục mới</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/categories/add}" method="post" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Tên danh mục</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm danh mục
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Danh sách danh mục</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên danh mục</th>
+                                <th>Số món ăn</th>
+                                <th>Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- THEO SQL + ENTITY -->
+                            <tr th:each="category : ${categories}">
+                                <td th:text="${category.id}"></td>
+                                <td th:text="${category.name}"></td>
+                                <td>
+                                    <span class="badge bg-primary"
+                                          th:text="${category.pdpDishes != null ? category.pdpDishes.size() : 0}">
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/categories/delete/{id}(id=${category.id})}"
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

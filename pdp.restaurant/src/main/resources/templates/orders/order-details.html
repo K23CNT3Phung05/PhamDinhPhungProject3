@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đơn hàng | PDP Restaurant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root { --pdp-gold: #ffc107; --pdp-dark: #212529; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .card-custom { border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .form-control { border-radius: 10px; padding: 12px; border: 1px solid #eee; }
+        .form-control:focus { box-shadow: none; border-color: var(--pdp-gold); }
+        .payment-option { cursor: pointer; transition: 0.3s; border: 2px solid #f1f1f1; border-radius: 12px; }
+        .payment-option:hover { border-color: var(--pdp-gold); background: #fffdf7; }
+        .summary-card { position: sticky; top: 90px; }
+        .btn-confirm { background: var(--pdp-dark); color: white; border-radius: 12px; padding: 15px; font-weight: bold; border: none; transition: 0.3s; }
+        .btn-confirm:hover { background: #000; transform: translateY(-2px); color: var(--pdp-gold); }
+        /* Nút chọn thêm món mới */
+        .btn-add-more { border: 2px dashed #dee2e6; color: #6c757d; border-radius: 12px; padding: 10px; transition: 0.3s; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .btn-add-more:hover { border-color: var(--pdp-gold); color: var(--pdp-dark); background: #fffdf7; }
+        .price-text { color: #e44d26; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" th:href="@{/dishs}">
+            <i class="bi bi-utensils me-2 text-warning"></i>PDP <span class="text-warning">RESTAURANT</span>
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-5 pb-5">
+    <div th:if="${cartItems == null || #lists.isEmpty(cartItems)}" class="text-center py-5">
+        <i class="bi bi-cart-x display-1 text-muted"></i>
+        <h2 class="mt-4">Giỏ hàng của bạn đang trống</h2>
+        <p class="text-muted">Vui lòng quay lại chọn món trước khi đặt hàng.</p>
+        <a th:href="@{/dishs}" class="btn btn-warning rounded-pill px-5 py-3 fw-bold mt-3">XEM THỰC ĐƠN NGAY</a>
+    </div>
+
+    <div class="row g-4" th:if="${cartItems != null && !#lists.isEmpty(cartItems)}">
+        <div class="col-lg-7">
+            <h3 class="mb-4 fw-bold"><i class="bi bi-geo-alt text-warning"></i> Thông tin giao hàng</h3>
+
+            <div class="card card-custom p-4 mb-4">
+                <form th:action="@{/orders/create}" method="post" id="orderForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Họ tên người nhận</label>
+                            <input type="text" name="fullName" class="form-control" placeholder="Nguyễn Văn A" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control" placeholder="0987xxxxxx" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Địa chỉ nhận hàng</label>
+                            <textarea name="shippingAddress" class="form-control" rows="2" placeholder="Số nhà, tên đường, phường/xã..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Ghi chú (Tùy chọn)</label>
+                            <textarea name="note" class="form-control" rows="2" placeholder="Ví dụ: Giao giờ hành chính, không cay..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="form-label fw-bold small mb-3 text-uppercase">Phương thức thanh toán</label>
+                        <div class="payment-option p-3 mb-2 d-flex align-items-center">
+                            <input class="form-check-input me-3" type="radio" name="paymentMethod" id="cash" value="CASH" checked>
+                            <label class="form-check-label w-100" for="cash">
+                                <i class="bi bi-cash-stack me-2 text-success"></i> Tiền mặt (COD)
+                            </label>
+                        </div>
+                        <div class="payment-option p-3 mb-2 d-flex align-items-center">
+                            <input class="form-check-input me-3" type="radio" name="paymentMethod" id="qr" value="QR_PAY">
+                            <label class="form-check-label w-100" for="qr">
+                                <i class="bi bi-qr-code-scan me-2 text-primary"></i> Chuyển khoản / QR Code
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="summary-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0"><i class="bi bi-receipt text-warning"></i> Đơn hàng</h3>
+                    <a th:href="@{/dishs}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                        <i class="bi bi-plus-lg"></i> Chọn thêm món
+                    </a>
+                </div>
+
+                <div class="card card-custom overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div th:each="item : ${cartItems}" class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <div class="fw-bold" th:text="${item.dishName}"></div>
+                                    <small class="text-muted">x[[${item.quantity}]]</small>
+                                </div>
+                                <span class="fw-bold" th:text="${#numbers.formatInteger(item.subTotal, 1, 'POINT')} + ' đ'"></span>
+                            </div>
+
+                            <a th:href="@{/dishs}" class="btn-add-more mb-4">
+                                <i class="bi bi-plus-circle me-2"></i> Bạn muốn dùng thêm gì không?
+                            </a>
+
+                            <hr class="my-4 opacity-50">
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tạm tính</span>
+                                <span th:text="${#numbers.formatInteger(totalPrice, 1, 'POINT')} + ' đ'"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Phí giao hàng</span>
+                                <span class="text-success fw-bold">MIỄN PHÍ</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 mb-0 fw-bold">Tổng thanh toán</span>
+                                <span class="h4 mb-0 price-text"
+                                      th:text="${#numbers.formatInteger(totalPrice, 1, 'POINT')} + ' đ'"></span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-light border-top text-center">
+                            <button type="submit" form="orderForm" class="btn btn-confirm w-100 shadow-sm mb-3">
+                                <i class="bi bi-bag-check-fill me-2"></i> XÁC NHẬN ĐẶT MÓN
+                            </button>
+                            <p class="small text-muted mb-0">Hài lòng với lựa chọn của bạn? Nhấn xác nhận để đầu bếp PDP bắt đầu chế biến!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-5 text-muted small">
+    &copy; 2025 PDP Restaurant - Giao hàng nhanh chóng & chất lượng
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

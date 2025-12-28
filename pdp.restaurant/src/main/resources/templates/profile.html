@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân - Tasty Restaurant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-gold: #c5a059; /* Màu vàng Champagne sang trọng */
+            --luxury-blue: #0a192f;
+            --soft-white: #ffffff;
+            --light-bg: #fdfdfd;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            color: #444;
+        }
+
+        h2, h3, .navbar-brand {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Navbar phong cách tối giản */
+        .navbar {
+            background-color: var(--soft-white) !important;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            color: var(--luxury-blue) !important;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            color: #555 !important;
+            font-weight: 500;
+            margin: 0 10px;
+        }
+        .nav-link.active {
+            color: var(--accent-gold) !important;
+        }
+
+        /* Card hồ sơ */
+        .profile-card {
+            background: var(--soft-white);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+            margin-top: 50px;
+            overflow: hidden;
+        }
+
+        .profile-banner {
+            height: 120px;
+            background: linear-gradient(to right, #ece9e6, #ffffff);
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .profile-header-content {
+            margin-top: -65px;
+            text-align: center;
+            padding-bottom: 30px;
+        }
+
+        .user-avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid var(--soft-white);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        /* Form styling */
+        .form-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 12px 15px;
+            background-color: #fafafa;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            background-color: #fff;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+        }
+
+        /* Nút bấm */
+        .btn-save {
+            background-color: var(--luxury-blue);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-save:hover {
+            background-color: var(--accent-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3);
+        }
+
+        /* Badge vai trò */
+        .role-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--accent-gold);
+            margin-top: 10px;
+        }
+
+        /* Thống kê nhỏ bên dưới */
+        .stat-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #f8f8f8;
+            transition: 0.3s;
+        }
+        .stat-card:hover {
+            border-color: var(--accent-gold);
+            background: var(--light-bg);
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--luxury-blue);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-utensils-alt me-2" style="color: var(--accent-gold);"></i>TASTY.
+        </a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="/menu">Thực đơn</a></li>
+                <li class="nav-item" th:if="${session.currentUser != null}">
+                    <a class="nav-link active" href="/profile">Hồ sơ</a>
+                </li>
+                <li class="nav-item ms-lg-3">
+                    <a class="btn btn-outline-secondary btn-sm rounded-pill px-3" href="/logout">Thoát</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            <div class="profile-card">
+                <div class="profile-banner"></div>
+                <div class="profile-header-content">
+                    <img src="https://ui-avatars.com/api/?background=c5a059&color=fff&name="
+                         th:attrappend="src=${user.fullName}"
+                         class="user-avatar" alt="User">
+                    <h2 class="mt-3 mb-1" th:text="${user.fullName}">Tên Thành Viên</h2>
+                    <div class="role-badge">
+                        <i class="fas fa-star me-1"></i>
+                        <span th:text="${user.role.name() == 'ADMIN' ? 'QUẢN TRỊ VIÊN' : 'THÀNH VIÊN TASTY'}">ROLE</span>
+                    </div>
+                </div>
+
+                <div class="px-4 px-md-5 pb-5">
+                    <div th:if="${successMessage}" class="alert alert-success border-0 rounded-3 mb-4 text-center" style="background: #e8f5e9; color: #2e7d32;">
+                        <small th:text="${successMessage}"></small>
+                    </div>
+
+                    <form th:action="@{/profile/update}" method="post" th:object="${user}">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Họ và tên đầy đủ</label>
+                                <input type="text" class="form-control" th:field="*{fullName}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Địa chỉ Email</label>
+                                <input type="email" class="form-control text-muted" th:field="*{email}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại liên lạc</label>
+                                <input type="tel" class="form-control" th:field="*{phone}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vị trí tài khoản</label>
+                                <input type="text" class="form-control text-muted" th:value="${user.role}" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Địa chỉ giao hàng mặc định</label>
+                                <textarea class="form-control" th:field="*{address}" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 text-center">
+                            <button type="submit" class="btn btn-save">
+                                Cập nhật thông tin hồ sơ
+                            </button>
+                            <div class="mt-3">
+                                <a href="/" class="text-muted text-decoration-none" style="font-size: 0.9rem;">
+                                    <i class="fas fa-arrow-left me-1"></i> Trở về trang chủ
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="row g-3 mt-5">
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-value">12</div>
+                                <div class="small text-muted text-uppercase" style="font-size: 0.65rem;">Đơn hàng</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-value">250</div>
+                                <div class="small text-muted text-uppercase" style="font-size: 0.65rem;">Điểm tích lũy</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-value">Gold</div>
+                                <div class="small text-muted text-uppercase" style="font-size: 0.65rem;">Thành viên</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-5 text-center">
+    <p class="text-muted small">© 2025 Tasty Restaurant Group. Designed for excellence.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
